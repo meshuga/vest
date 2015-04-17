@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/kevinbayes/vest.png?branch=master)](https://travis-ci.org/kevinbayes/vest)
+[![Dependency Status](https://www.versioneye.com/user/projects/5530d02910e7141211000bbc/badge.svg?style=flat)](https://www.versioneye.com/user/projects/5530d02910e7141211000bbc)
 
 Vest Framework
 ==============

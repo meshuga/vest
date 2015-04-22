@@ -16,6 +16,7 @@
 package me.bayes.vertx.vest.deploy;
 
 import static org.junit.Assert.*;
+import io.vertx.core.json.JsonObject;
 
 import javax.ws.rs.core.Application;
 
@@ -24,7 +25,6 @@ import me.bayes.vertx.vest.sample.PingEndpoint;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.vertx.java.core.json.JsonObject;
 
 /**
  * @author kevinbayes

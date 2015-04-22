@@ -15,6 +15,10 @@
  */
 package me.bayes.vertx.vest;
 
+import io.vertx.core.Handler;
+import io.vertx.ext.apex.Route;
+import io.vertx.ext.apex.Router;
+
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -43,8 +47,6 @@ import me.bayes.vertx.vest.util.UriPathUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.http.RouteMatcher;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -94,11 +96,11 @@ public class DefaultRouteMatcherBuilder extends AbstractRouteMatcherBuilder {
 	 * (non-Javadoc)
 	 * @see me.bayes.vertx.extension.RouteMatcherBuilder#build(me.bayes.vertx.extension.BuilderContext)
 	 */
-	protected RouteMatcher buildInternal() throws Exception {
+	protected Router buildInternal() throws Exception {
 
-		addRoutes(routeMatcher);
+		addRoutes(router);
 		
-		return routeMatcher;
+		return router;
 	}
 	/**
 	 * The simplest case adds routes and delegates the execution to the method annotated with the {@link Path} annotation. 
@@ -106,25 +108,24 @@ public class DefaultRouteMatcherBuilder extends AbstractRouteMatcherBuilder {
 	 * @param routeMatcher
 	 * @throws Exception
 	 */
-	private void addRoutes(final RouteMatcher routeMatcher) throws Exception {
+	private void addRoutes(final Router routeMatcher) throws Exception {
 		final ObjectMapper objectMapper = application.getSingleton(ObjectMapper.class);
 
 		this.bindingHolder.foreach(new Function() {
 			public void apply(final String method, final String key, final List<MethodBinding> bindings) throws Exception {
 				
 				//3.7 Matching Requests to Resource Methods is delegated to vertx route matcher.
-				final Method routeMatcherMethod = RouteMatcher.class.getMethod(
+				final Method getRouteMethod = Router.class.getMethod(
 							method.toLowerCase(), 
-							String.class,
-							Handler.class);
+							String.class);
 				
 				final String finalPath = UriPathUtil.convertPath(key);
 
 				HttpServerRequestHandler requestHandler = new FilteredHttpServerRequestHandler(bindings, parameterResolver, objectMapper,
 						application.getProviders(ContainerRequestFilter.class),
 						application.getProviders(ContainerResponseFilter.class));
-				routeMatcherMethod.invoke(routeMatcher, finalPath, requestHandler);
-				
+				Route route = (Route) getRouteMethod.invoke(routeMatcher, finalPath);
+				route.handler(requestHandler);
 			}
 		});
 	}

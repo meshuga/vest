@@ -1,8 +1,14 @@
 package me.bayes.vertx.vest.handler.context;
 
+import io.vertx.core.Handler;
+import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerRequest;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,10 +37,6 @@ import javax.ws.rs.core.Variant;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.MultiMap;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpServerRequest;
 
 public class VertxContainerRequestContext implements ContainerRequestContext {
 
@@ -104,7 +106,7 @@ public class VertxContainerRequestContext implements ContainerRequestContext {
 
 	@Override
 	public String getMethod() {
-		return originalRequest.method();
+		return originalRequest.method().name();
 	}
 
 	@Override
@@ -279,12 +281,16 @@ public class VertxContainerRequestContext implements ContainerRequestContext {
 
 		@Override
 		public URI getRequestUri() {
-			return rsRequest.absoluteURI();
+			try {
+                return new URI(rsRequest.absoluteURI());
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
 		}
 
 		@Override
 		public UriBuilder getRequestUriBuilder() {
-			return UriBuilderImpl.fromUri(getRequestUri());
+			return new UriBuilderImpl().uri(getRequestUri());
 		}
 
 		@Override
@@ -292,17 +298,21 @@ public class VertxContainerRequestContext implements ContainerRequestContext {
 			if (absolutePathUri != null)
 				return absolutePathUri;
 
-			return absolutePathUri = UriBuilderImpl.fromUri(requestUri).replaceQuery("").fragment("").build();
+			return absolutePathUri = new UriBuilderImpl().uri(getRequestUri()).replaceQuery("").fragment("").build();
 		}
 
 		@Override
 		public UriBuilder getAbsolutePathBuilder() {
-			return UriBuilderImpl.fromUri(getAbsolutePath());
+			return new UriBuilderImpl().uri(getAbsolutePath());
 		}
 
 		@Override
 		public URI getBaseUri() {
-			return rsRequest.absoluteURI(); // TODO
+            try {
+                return new URI(rsRequest.absoluteURI()); //TODO
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
 		}
 
 		@Override
@@ -406,7 +416,7 @@ public class VertxContainerRequestContext implements ContainerRequestContext {
 
 		@Override
 		public String getMethod() {
-			return rsRequest.method();
+			return rsRequest.method().name();
 		}
 
 		@Override

@@ -1,19 +1,24 @@
 package me.bayes.vertx.vest.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import me.bayes.vertx.vest.binding.RouteBindingHolder;
 import me.bayes.vertx.vest.util.ParameterResolver;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.buffer.Buffer;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.HttpServerResponse;
-import org.vertx.java.core.json.JsonObject;
+
+import io.vertx.core.Handler;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+import io.vertx.core.json.JsonObject;
+import io.vertx.ext.apex.RoutingContext;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +27,7 @@ import java.util.List;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.INTERNAL_SERVER_ERROR;
 
-public class HttpServerRequestHandler implements Handler<HttpServerRequest> {
+public class HttpServerRequestHandler implements Handler<RoutingContext> {
 
     private static final Logger LOG = LoggerFactory.getLogger(HttpServerRequestHandler.class);
 
@@ -39,8 +44,10 @@ public class HttpServerRequestHandler implements Handler<HttpServerRequest> {
         this.objectMapper = objectMapper;
     }
 
-    public void handle(HttpServerRequest request) {
+    public void handle(RoutingContext routingContext) {
 
+        HttpServerRequest request = routingContext.request();
+        
         try {
             RouteBindingHolder.MethodBinding binding = null;
             Method method;
@@ -160,9 +167,9 @@ public class HttpServerRequestHandler implements Handler<HttpServerRequest> {
                                       final int objectParameterIndex, final Method method,
                                       final Object[] parameters, final Class<?>[] parameterTypes, final boolean deserializeUsingJackson) {
 
-        final Buffer buffer = new Buffer();
+        final Buffer buffer = Buffer.buffer();
 
-        request.dataHandler(new Handler<Buffer>() {
+        request.handler(new Handler<Buffer>() {
 
             @Override
             public void handle(Buffer internalBuffer) {

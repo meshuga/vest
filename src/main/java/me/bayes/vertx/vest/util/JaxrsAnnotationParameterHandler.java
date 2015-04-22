@@ -15,6 +15,8 @@
  */
 package me.bayes.vertx.vest.util;
 
+import io.vertx.core.http.HttpServerRequest;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -28,9 +30,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import com.github.drapostolos.typeparser.TypeParser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.http.HttpServerRequest;
 
 public class JaxrsAnnotationParameterHandler implements ParameterHandler<Object> {
 

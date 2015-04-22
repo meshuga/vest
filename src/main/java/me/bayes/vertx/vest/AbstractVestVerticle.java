@@ -18,15 +18,17 @@ package me.bayes.vertx.vest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.http.HttpServer;
-import org.vertx.java.core.json.JsonObject;
-import org.vertx.java.platform.Verticle;
+
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Verticle;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author kevinbayes
  *
  */
-public abstract class AbstractVestVerticle extends Verticle implements VestService {
+public abstract class AbstractVestVerticle extends AbstractVerticle implements VestService {
 	
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractVestVerticle.class);
 	
@@ -36,8 +38,8 @@ public abstract class AbstractVestVerticle extends Verticle implements VestServi
 	@Override
 	public void start() {
 		
-		final JsonObject config = container.config();
-		final HttpServer server = vertx.createHttpServer();
+		final JsonObject config = config();
+		final HttpServer server = getVertx().createHttpServer();
 		final String listenHost = config.getString(LISTEN_HOST);
 		final int listenPort = 
 				(config.getInteger(LISTEN_PORT) == null) ? 
@@ -46,7 +48,7 @@ public abstract class AbstractVestVerticle extends Verticle implements VestServi
 		try {
 		
 		VestApplication application = createApplication(config);
-		application.addSingleton(container, vertx);
+		application.addSingleton(vertx);
 		
 		//A hook to add to the VestApplication once it has been created.
 		postApplicationCreationProcess(application);
@@ -56,8 +58,7 @@ public abstract class AbstractVestVerticle extends Verticle implements VestServi
 		
 		postRouteMatcherBuilderCreationProcess(routeBuilder);
 		
-		server.requestHandler(
-				routeBuilder.build());
+		server.requestHandler(routeBuilder.build()::accept);
 		
 		//Set listen information
 		if(listenHost == null) {

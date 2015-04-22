@@ -15,12 +15,12 @@
  */
 package me.bayes.vertx.vest.deploy;
 
+import io.vertx.core.json.JsonObject;
+
 import java.net.URI;
 import java.util.Scanner;
 
 import me.bayes.vertx.vest.util.JsonUtil;
-
-import org.vertx.java.core.json.JsonObject;
 
 public class Standalone {
 

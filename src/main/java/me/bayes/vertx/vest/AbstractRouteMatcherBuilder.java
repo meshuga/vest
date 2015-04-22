@@ -15,13 +15,15 @@
  */
 package me.bayes.vertx.vest;
 
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.apex.Router;
 import me.bayes.vertx.vest.binding.RouteBindingHolder;
 import me.bayes.vertx.vest.binding.RouteBindingHolderFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.RouteMatcher;
 
 /**
  * @author Kevin Bayes
@@ -31,7 +33,7 @@ public abstract class AbstractRouteMatcherBuilder implements RouteMatcherBuilder
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractRouteMatcherBuilder.class);
 
 	protected VestApplication application;
-	protected RouteMatcher routeMatcher;
+	protected Router router;
 	protected RouteBindingHolderFactory bindingHolderFactory;
 	protected RouteBindingHolder bindingHolder;
 
@@ -39,9 +41,10 @@ public abstract class AbstractRouteMatcherBuilder implements RouteMatcherBuilder
 			RouteBindingHolderFactory bindingHolderFactory) {
 		super();
 		this.application = application;
-		this.routeMatcher = new RouteMatcher();
+		Vertx vertx = Vertx.factory.vertx();
+		this.router = Router.router(vertx);
 		this.bindingHolderFactory = bindingHolderFactory;
-		this.application.addSingleton(this.routeMatcher, this.bindingHolder);
+		this.application.addSingleton(this.router, this.bindingHolder);
 	}
 
 	public VestApplication getApplication() {
@@ -62,7 +65,7 @@ public abstract class AbstractRouteMatcherBuilder implements RouteMatcherBuilder
 	 * (non-Javadoc)
 	 * @see me.bayes.vertx.vest.RouteMatcherBuilder#build()
 	 */
-	public RouteMatcher build() throws Exception {
+	public Router build() throws Exception {
 		
 		if(application == null) {
 			LOG.error("No application was set.");
@@ -89,7 +92,7 @@ public abstract class AbstractRouteMatcherBuilder implements RouteMatcherBuilder
 	 * @return a {@link RouteMatcher}
 	 * @throws Exception
 	 */
-	protected abstract RouteMatcher buildInternal() throws Exception; 
+	protected abstract Router buildInternal() throws Exception; 
 	
 	/*
 	 *  TODO: Add the implemetation required by the specification.
@@ -98,7 +101,7 @@ public abstract class AbstractRouteMatcherBuilder implements RouteMatcherBuilder
 	 * @see me.bayes.vertx.vest.RouteMatcherBuilder#setNoRouteHandler(org.vertx.java.core.Handler)
 	 */
 	public void setNoRouteHandler(Handler<HttpServerRequest> handler) {
-		routeMatcher.noMatch(handler);
+//		router.noMatch(handler); //TODO
 	}
 	
 }

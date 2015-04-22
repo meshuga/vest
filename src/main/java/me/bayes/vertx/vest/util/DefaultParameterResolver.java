@@ -15,6 +15,9 @@
  */
 package me.bayes.vertx.vest.util;
 
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -22,13 +25,12 @@ import java.lang.reflect.Method;
 import javax.ws.rs.CookieParam;
 import javax.ws.rs.MatrixParam;
 
-import com.github.drapostolos.typeparser.TypeParser;
 import me.bayes.vertx.vest.VestApplication;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.HttpServerResponse;
+
+import com.github.drapostolos.typeparser.TypeParser;
 
 /**
  * <pre>

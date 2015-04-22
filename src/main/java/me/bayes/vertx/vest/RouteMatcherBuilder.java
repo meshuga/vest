@@ -15,12 +15,11 @@
  */
 package me.bayes.vertx.vest;
 
+import io.vertx.core.Handler;
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.apex.Router;
 
 
-
-import org.vertx.java.core.Handler;
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.RouteMatcher;
 
 /**
  * The {@link RouteMatcherBuilder} builds a {@link RouteMatcher} that vertx uses to 
@@ -42,7 +41,7 @@ public interface RouteMatcherBuilder {
 	 * @return
 	 * @throws Exception
 	 */
-	RouteMatcher build() throws Exception;
+	Router build() throws Exception;
 	
 	
 	/**

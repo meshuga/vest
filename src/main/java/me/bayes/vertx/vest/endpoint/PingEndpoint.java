@@ -15,6 +15,9 @@
  */
 package me.bayes.vertx.vest.endpoint;
 
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.core.http.HttpServerResponse;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,9 +26,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
 import me.bayes.vertx.vest.handler.VertxAwareHandler;
-
-import org.vertx.java.core.http.HttpServerRequest;
-import org.vertx.java.core.http.HttpServerResponse;
 
 @Path("/ping")
 public class PingEndpoint extends VertxAwareHandler {

@@ -1,5 +1,8 @@
 package me.bayes.vertx.vest.handler;
 
+import io.vertx.core.http.HttpServerRequest;
+import io.vertx.ext.apex.RoutingContext;
+
 import java.io.IOException;
 import java.util.List;
 
@@ -13,7 +16,6 @@ import me.bayes.vertx.vest.util.ParameterResolver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.http.HttpServerRequest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -32,8 +34,8 @@ public class FilteredHttpServerRequestHandler extends HttpServerRequestHandler {
 	}
 	
 	@Override
-	public void handle(HttpServerRequest request) {
-		ContainerRequestContext requestContext = new VertxContainerRequestContext(request);
+	public void handle(RoutingContext routingContext) {
+		ContainerRequestContext requestContext = new VertxContainerRequestContext(routingContext.request());
 		for (ContainerRequestFilter containerRequestFilter : containerRequestFilters) {
 			try {
 				LOG.info("Run filted: " + containerRequestFilter);
@@ -43,7 +45,7 @@ public class FilteredHttpServerRequestHandler extends HttpServerRequestHandler {
 				throw new RuntimeException(e);
 			}
 		}
-		super.handle(request);
+		super.handle(routingContext);
 		
 		//TODO response filters
 	}

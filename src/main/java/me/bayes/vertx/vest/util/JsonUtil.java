@@ -15,14 +15,14 @@
  */
 package me.bayes.vertx.vest.util;
 
+import io.vertx.core.json.JsonObject;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.vertx.java.core.json.JsonObject;
 
 /**
  * <pre>

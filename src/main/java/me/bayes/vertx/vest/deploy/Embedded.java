@@ -15,16 +15,17 @@
  */
 package me.bayes.vertx.vest.deploy;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.http.HttpServer;
+import io.vertx.core.impl.VertxFactoryImpl;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.spi.VertxFactory;
 import me.bayes.vertx.vest.DefaultRouteMatcherBuilder;
 import me.bayes.vertx.vest.RouteMatcherBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.vertx.java.core.Vertx;
-import org.vertx.java.core.VertxFactory;
-import org.vertx.java.core.http.HttpServer;
-import org.vertx.java.core.json.JsonArray;
-import org.vertx.java.core.json.JsonObject;
 
 /**
  * @author Kevin Bayes
@@ -42,9 +43,9 @@ public class Embedded {
 	
 	public Vertx start(final JsonObject config) throws Exception {
 		
-		final Vertx vertx = VertxFactory.newVertx();
-		final JsonArray vestPackagesToScan = config.getArray("vestPackagesToScan");
-		final JsonArray vestClasses = config.getArray("vestClasses");
+		final Vertx vertx = new VertxFactoryImpl().vertx();
+		final JsonArray vestPackagesToScan = config.getJsonArray("vestPackagesToScan");
+		final JsonArray vestClasses = config.getJsonArray("vestClasses");
 		final RootContextVestApplication application = new RootContextVestApplication();
 		final HttpServer server = vertx.createHttpServer();
 		final RouteMatcherBuilder builder = new DefaultRouteMatcherBuilder(application);
@@ -75,7 +76,7 @@ public class Embedded {
 		application.addSingleton(config);
 		application.addSingleton(vertx);
 		
-		server.requestHandler(builder.build());
+		server.requestHandler(builder.build()::accept);
 		
 		//Set listen information
 		if(listenHost == null) {

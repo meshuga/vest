@@ -15,7 +15,8 @@
  */
 package me.bayes.vertx.vest;
 
-import org.vertx.java.core.json.JsonObject;
+import io.vertx.core.json.JsonObject;
+
 
 /**
  * 

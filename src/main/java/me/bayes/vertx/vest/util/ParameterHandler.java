@@ -15,11 +15,11 @@
  */
 package me.bayes.vertx.vest.util;
 
+import io.vertx.core.http.HttpServerRequest;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-
-import org.vertx.java.core.http.HttpServerRequest;
 
 /**
  * The parameter handler resolves the value of the parameter.

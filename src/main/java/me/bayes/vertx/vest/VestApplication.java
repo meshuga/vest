@@ -15,6 +15,8 @@
  */
 package me.bayes.vertx.vest;
 
+import io.vertx.core.impl.verticle.PackageHelper;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -40,9 +42,8 @@ import javax.ws.rs.ext.Provider;
 import me.bayes.vertx.vest.deploy.RootContextVestApplication;
 
 import org.apache.commons.lang3.ObjectUtils;
-import org.vertx.java.core.logging.Logger;
-import org.vertx.java.core.logging.impl.LoggerFactory;
-import org.vertx.java.platform.impl.java.PackageHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.drapostolos.typeparser.TypeParser;
 

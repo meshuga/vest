@@ -51,20 +51,13 @@ public abstract class AbstractRouteMatcherBuilder implements RouteMatcherBuilder
 		return application;
 	}
 
-	
-	/*
-	 * (non-Javadoc)
-	 * @see me.bayes.vertx.vest.RouteMatcherBuilder#setApplication(me.bayes.vertx.vest.VestApplication)
-	 */
+	@Override
 	public void setApplication(VestApplication application) {
 		this.application = application;
 	}
 	
-	
-	/*
-	 * (non-Javadoc)
-	 * @see me.bayes.vertx.vest.RouteMatcherBuilder#build()
-	 */
+
+	@Override
 	public Router build() throws Exception {
 		
 		if(application == null) {

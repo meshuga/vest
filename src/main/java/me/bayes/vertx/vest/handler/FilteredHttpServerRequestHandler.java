@@ -1,6 +1,5 @@
 package me.bayes.vertx.vest.handler;
 
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.ext.apex.RoutingContext;
 
 import java.io.IOException;

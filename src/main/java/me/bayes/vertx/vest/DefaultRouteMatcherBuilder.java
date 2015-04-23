@@ -16,10 +16,10 @@
 package me.bayes.vertx.vest;
 
 import io.vertx.core.Handler;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.apex.Route;
 import io.vertx.ext.apex.Router;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -105,26 +105,49 @@ public class DefaultRouteMatcherBuilder extends AbstractRouteMatcherBuilder {
 	/**
 	 * The simplest case adds routes and delegates the execution to the method annotated with the {@link Path} annotation. 
 	 * 
-	 * @param routeMatcher
+	 * @param router
 	 * @throws Exception
 	 */
-	private void addRoutes(final Router routeMatcher) throws Exception {
+	private void addRoutes(final Router router) throws Exception {
 		final ObjectMapper objectMapper = application.getSingleton(ObjectMapper.class);
 
 		this.bindingHolder.foreach(new Function() {
-			public void apply(final String method, final String key, final List<MethodBinding> bindings) throws Exception {
+			public void apply(final HttpMethod method, final String key, final List<MethodBinding> bindings) throws Exception {
 				
-				//3.7 Matching Requests to Resource Methods is delegated to vertx route matcher.
-				final Method getRouteMethod = Router.class.getMethod(
-							method.toLowerCase(), 
-							String.class);
-				
+				Route route = null;
 				final String finalPath = UriPathUtil.convertPath(key);
-
+				
+				//3.7 Matching Requests to Resource Methods is delegated to vertx router.
+				switch (method) {
+					case GET:
+						route = router.get(finalPath);
+						break;
+					case DELETE:
+						route = router.delete(finalPath);
+						break;
+					case HEAD:
+						route = router.head(finalPath);
+						break;
+					case OPTIONS:
+						route = router.options(finalPath);
+						break;
+					case POST:
+						route = router.post(finalPath);
+						break;
+					case PUT:
+						route = router.put(finalPath);
+						break;
+					case CONNECT:
+					case PATCH:
+					case TRACE:
+						throw new IllegalArgumentException("Unsupported http method: " + method);
+					default:
+						throw new IllegalArgumentException("Unknown http method: " + method);
+				}
+				
 				HttpServerRequestHandler requestHandler = new FilteredHttpServerRequestHandler(bindings, parameterResolver, objectMapper,
 						application.getProviders(ContainerRequestFilter.class),
 						application.getProviders(ContainerResponseFilter.class));
-				Route route = (Route) getRouteMethod.invoke(routeMatcher, finalPath);
 				route.handler(requestHandler);
 			}
 		});

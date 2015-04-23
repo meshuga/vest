@@ -151,7 +151,7 @@ public class DefaultRouteBindingHolderFactory implements
 
 		LOG.info(String.format("Added %s %s to be handled by %s.%s", httpMethod.value(), finalPath, clazz.getCanonicalName(), method.getName()));
 		
-		bindingHolder.addBinding(httpMethod, finalPath, consumes, produces, instance, clazz, method);
+		bindingHolder.addBinding(io.vertx.core.http.HttpMethod.valueOf(httpMethod.value()), finalPath, consumes, produces, instance, clazz, method);
 	}
 	
 

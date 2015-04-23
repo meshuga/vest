@@ -15,6 +15,8 @@
  */
 package me.bayes.vertx.vest.binding;
 
+import io.vertx.core.http.HttpMethod;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +26,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -55,24 +56,24 @@ public class RouteBindingHolder {
 	private final Map<String, List<MethodBinding>> emptyMap = Collections.unmodifiableMap(new HashMap<String, List<MethodBinding>>(0));
 	
 	public void foreach(Function function) {
-		foreach("GET", function, getBindings);
-		foreach("PUT", function, putBindings);
-		foreach("POST", function, postBindings);
-		foreach("DELETE", function, deleteBindings);
-		foreach("OPTIONS", function, optionsBindings);
-		foreach("HEAD", function, headBindings);
-		foreach("TRACE", function, traceBindings);
-		foreach("CONNECT", function, connectBindings);
-		foreach("PATCH", function, patchBindings);
+		foreach(HttpMethod.GET, function, getBindings);
+		foreach(HttpMethod.PUT, function, putBindings);
+		foreach(HttpMethod.POST, function, postBindings);
+		foreach(HttpMethod.DELETE, function, deleteBindings);
+		foreach(HttpMethod.OPTIONS, function, optionsBindings);
+		foreach(HttpMethod.HEAD, function, headBindings);
+		foreach(HttpMethod.TRACE, function, traceBindings);
+		foreach(HttpMethod.CONNECT, function, connectBindings);
+		foreach(HttpMethod.PATCH, function, patchBindings);
 	}
 	
-	private void foreach(String method, Function function, Map<String, List<MethodBinding>> bindings) {
+	private void foreach(HttpMethod method, Function function, Map<String, List<MethodBinding>> bindings) {
 		for(Entry<String, List<MethodBinding>> binding : bindings.entrySet()) {
 			applyFunction(method, function, binding);
 		}
 	}
 	
-	private void applyFunction(String method, Function function, Entry<String, List<MethodBinding>> binding) {
+	private void applyFunction(HttpMethod method, Function function, Entry<String, List<MethodBinding>> binding) {
 		try {
 			function.apply(method, binding.getKey(), binding.getValue());
 		} catch (Exception e) {
@@ -112,35 +113,31 @@ public class RouteBindingHolder {
 	}
 	
 	private Map<String, List<MethodBinding>> getMethodBindingMap(HttpMethod method) {
-		return getMethodBindingMap(method.value());
-	}
-	
-	private Map<String, List<MethodBinding>> getMethodBindingMap(String verb) {
-		switch (verb) {
-		case HttpMethod.DELETE:
-			return deleteBindings;
-		case HttpMethod.GET:
-			return getBindings;
-		case HttpMethod.HEAD:
-			return headBindings;
-		case HttpMethod.OPTIONS:
-			return optionsBindings;
-		case HttpMethod.POST:
-			return postBindings;
-		case HttpMethod.PUT:
-			return putBindings;
-		case "TRACE":
-			return traceBindings;
-		case "CONNECT":
-			return connectBindings;
-		case "PATCH":
-			return patchBindings;
-		default:
-			return emptyMap;
+		switch (method) {
+			case DELETE:
+				return deleteBindings;
+			case GET:
+				return getBindings;
+			case HEAD:
+				return headBindings;
+			case OPTIONS:
+				return optionsBindings;
+			case POST:
+				return postBindings;
+			case PUT:
+				return putBindings;
+			case TRACE:
+				return traceBindings;
+			case CONNECT:
+				return connectBindings;
+			case PATCH:
+				return patchBindings;
+			default:
+				return emptyMap;
 		}
 	}
 	
-	public MethodBinding getBinding(String method, String path, String contentType, String accepts){
+	public MethodBinding getBinding(HttpMethod method, String path, String contentType, String accepts){
 		List<MethodBinding> bindings = getMethodBindingMap(method).get(path);
 		if(bindings != null) {
 			for(MethodBinding binding : bindings) {

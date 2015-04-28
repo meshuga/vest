@@ -47,122 +47,122 @@ public class HttpServerRequestHandler implements Handler<RoutingContext> {
     }
 
     public void handle(RoutingContext routingContext) {
-
         HttpServerRequest request = routingContext.request();
-        
+
         try {
-            RouteBindingHolder.MethodBinding binding = null;
-            Method method;
-
-            String acceptsHeader = request.headers().get(HttpHeaders.ACCEPT);
-            String contentTypeHeader = request.headers().get(HttpHeaders.CONTENT_TYPE);
-
-            if (!request.headers().isEmpty()) {
-                for (RouteBindingHolder.MethodBinding binding_ : bindings) {
-                    if (binding_.hasConsumes(contentTypeHeader) && binding_.hasProduces(acceptsHeader)) {
-                        binding = binding_;
-                        break;
-                    }
-                    if (binding_.hasConsumes(contentTypeHeader) && acceptsHeader == null) {
-                        binding = binding_;
-                        break;
-                    }
-                    if (contentTypeHeader == null && binding_.hasProduces(acceptsHeader)) {
-                        binding = binding_;
-                        break;
-                    }
-                }
-
-            }
-
-            if (binding == null && delegates.size() > 0) {
-                binding = delegates.get(0);
-            } else if (binding == null) {
-                throw new Exception("No route that supports accepts given HTTP parameters");
-            }
-
-            method = binding.getMethod();
-
-            final Class<?>[] parameterTypes = method.getParameterTypes();
-            if (parameterTypes.length == 0 || !parameterTypes[0].equals(HttpServerRequest.class)) {
-                LOG.warn("Classes marked with a HttpMethod must have at least one parameter. The first parameter should be HttpServerRequest.");
-                return;
-            }
-
-            final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-            final String[] produces = binding.getProduces();
-            final String[] consumes = binding.getConsumes();
-            String producesMediaType = null;
-
-            if (acceptsHeader != null) {
-                if (produces != null && produces.length > 0) {
-                    for (String type : produces) {
-                        if (acceptsHeader.contains(type)) {
-                            producesMediaType = type;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (producesMediaType == null) {
-                producesMediaType =
-                        (produces != null && produces.length == 1) ?
-                                produces[0] : MediaType.TEXT_PLAIN;
-            }
-
-            if (contentTypeHeader != null) {
-                if (consumes != null && consumes.length > 0) {
-                    for (String type : consumes) {
-                        if (acceptsHeader.contains(type)) {
-                            contentTypeHeader = type;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            request.response().headers().set(HttpHeaders.CONTENT_TYPE, producesMediaType);
-
-            final Object[] parameters = new Object[parameterTypes.length];
-            parameters[0] = request;
-
-            boolean isBodyResolved = false;
-            boolean deserializeUsingJackson = false;
-            int objectParameterIndex = -1;
-
-            if (parameters.length > 1) {
-                for (int i = 1; i < parameters.length; i++) {
-                    if (hasJaxRsAnnotations(parameterAnnotations[i]) ||
-                            HttpServerResponse.class.equals(parameterTypes[i])) {
-
-                        parameters[i] = parameterResolver.resolve(method, parameterTypes[i], parameterAnnotations[i], request);
-
-                    } else if (JsonObject.class.equals(parameterTypes[i])) {
-                        objectParameterIndex = i;
-                        isBodyResolved = true;
-                        deserializeUsingJackson = false;
-                    } else {
-                        objectParameterIndex = i;
-                        isBodyResolved = true;
-                        deserializeUsingJackson = true;
-                    }
-                }
-            }
-
-            if (isBodyResolved) {
-                resolvedBodyDelegate(binding.getDelegate(), request, objectParameterIndex, method, parameters, parameterTypes, deserializeUsingJackson);
-            } else {
-                delegate(binding.getDelegate(), method, parameters);
-            }
-
+            handleInternal(request);
+        } catch (final InvocationTargetException ex) {
+            handleException(request, ex.getTargetException());
         } catch (Exception e) {
             handleException(request, e);
         }
     }
 
-    private void delegate(Object delegate, Method method, Object[] parameters) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-        method.invoke(delegate, parameters);
+    private void handleInternal(HttpServerRequest request) throws Exception {
+        RouteBindingHolder.MethodBinding binding = null;
+        Method method;
+
+        String acceptsHeader = request.headers().get(HttpHeaders.ACCEPT);
+        String contentTypeHeader = request.headers().get(HttpHeaders.CONTENT_TYPE);
+
+        if (!request.headers().isEmpty()) {
+            for (RouteBindingHolder.MethodBinding binding_ : bindings) {
+                if (binding_.hasConsumes(contentTypeHeader) && binding_.hasProduces(acceptsHeader)) {
+                    binding = binding_;
+                    break;
+                }
+                if (binding_.hasConsumes(contentTypeHeader) && acceptsHeader == null) {
+                    binding = binding_;
+                    break;
+                }
+                if (contentTypeHeader == null && binding_.hasProduces(acceptsHeader)) {
+                    binding = binding_;
+                    break;
+                }
+            }
+
+        }
+
+        if (binding == null && delegates.size() > 0) {
+            binding = delegates.get(0);
+        } else if (binding == null) {
+            throw new Exception("No route that supports accepts given HTTP parameters");
+        }
+
+        method = binding.getMethod();
+
+        final Class<?>[] parameterTypes = method.getParameterTypes();
+        if (parameterTypes.length == 0 || !parameterTypes[0].equals(HttpServerRequest.class)) {
+            LOG.warn("Classes marked with a HttpMethod must have at least one parameter. The first parameter should be HttpServerRequest.");
+            return;
+        }
+
+        final Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+        final String[] produces = binding.getProduces();
+        final String[] consumes = binding.getConsumes();
+        String producesMediaType = null;
+
+        if (acceptsHeader != null) {
+            if (produces != null && produces.length > 0) {
+                for (String type : produces) {
+                    if (acceptsHeader.contains(type)) {
+                        producesMediaType = type;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (producesMediaType == null) {
+            producesMediaType =
+                    (produces != null && produces.length == 1) ?
+                            produces[0] : MediaType.TEXT_PLAIN;
+        }
+
+        if (contentTypeHeader != null) {
+            if (consumes != null && consumes.length > 0) {
+                for (String type : consumes) {
+                    if (acceptsHeader.contains(type)) {
+                        contentTypeHeader = type;
+                        break;
+                    }
+                }
+            }
+        }
+
+        request.response().headers().set(HttpHeaders.CONTENT_TYPE, producesMediaType);
+
+        final Object[] parameters = new Object[parameterTypes.length];
+        parameters[0] = request;
+
+        boolean isBodyResolved = false;
+        boolean deserializeUsingJackson = false;
+        int objectParameterIndex = -1;
+
+        if (parameters.length > 1) {
+            for (int i = 1; i < parameters.length; i++) {
+                if (hasJaxRsAnnotations(parameterAnnotations[i]) ||
+                        HttpServerResponse.class.equals(parameterTypes[i])) {
+
+                    parameters[i] = parameterResolver.resolve(method, parameterTypes[i], parameterAnnotations[i], request);
+
+                } else if (JsonObject.class.equals(parameterTypes[i])) {
+                    objectParameterIndex = i;
+                    isBodyResolved = true;
+                    deserializeUsingJackson = false;
+                } else {
+                    objectParameterIndex = i;
+                    isBodyResolved = true;
+                    deserializeUsingJackson = true;
+                }
+            }
+        }
+
+        if (isBodyResolved) {
+            resolvedBodyDelegate(binding.getDelegate(), request, objectParameterIndex, method, parameters, parameterTypes, deserializeUsingJackson);
+        } else {
+            method.invoke(binding.getDelegate(), parameters);
+        }
     }
 
     private void resolvedBodyDelegate(final Object delegate, final HttpServerRequest request,
@@ -188,13 +188,15 @@ public class HttpServerRequestHandler implements Handler<RoutingContext> {
 
             try {
                 method.invoke(delegate, parameters);
+            } catch (final InvocationTargetException ex) {
+                handleException(request, ex.getTargetException());
             } catch (Exception e) {
                 handleException(request, e);
             }
         });
     }
 
-    private void handleException(HttpServerRequest request, Exception e) {
+    private void handleException(HttpServerRequest request, Throwable e) {
         LOG.error("Exception occurred.", e);
         exceptionHandler.handle(e, request);
     }

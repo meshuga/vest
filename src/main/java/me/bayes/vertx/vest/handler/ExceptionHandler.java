@@ -66,6 +66,8 @@ public class ExceptionHandler {
                 throw new RuntimeException(e);
             }
             request.response().end(jsonSerializedValue);
+        } else {
+            request.response().end();
         }
     }
 }

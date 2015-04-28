@@ -35,13 +35,15 @@ public class HttpServerRequestHandler implements Handler<RoutingContext> {
     private List<RouteBindingHolder.MethodBinding> delegates;
     private final ParameterResolver parameterResolver;
     private final ObjectMapper objectMapper;
+    private final ExceptionHandler exceptionHandler;;
 
     public HttpServerRequestHandler(List<RouteBindingHolder.MethodBinding> bindings, ParameterResolver parameterResolver,
-                                    ObjectMapper objectMapper) {
+                                    ObjectMapper objectMapper, ExceptionHandler exceptionHandler) {
         this.bindings = bindings;
         this.delegates = bindings;
         this.parameterResolver = parameterResolver;
         this.objectMapper = objectMapper;
+        this.exceptionHandler = exceptionHandler;
     }
 
     public void handle(RoutingContext routingContext) {
@@ -204,11 +206,7 @@ public class HttpServerRequestHandler implements Handler<RoutingContext> {
 
     private void handleException(HttpServerRequest request, Exception e) {
         LOG.error("Exception occurred.", e);
-
-        request.response().headers().set(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN);
-        request.response().setStatusCode(INTERNAL_SERVER_ERROR.code());
-        request.response().setStatusMessage(INTERNAL_SERVER_ERROR.reasonPhrase());
-        request.response().end();
+        exceptionHandler.handle(e, request);
     }
 
     private boolean hasJaxRsAnnotations(Annotation[] parameterAnnotation) {

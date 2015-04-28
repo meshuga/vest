@@ -23,13 +23,16 @@ public class FilteredHttpServerRequestHandler extends HttpServerRequestHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(FilteredHttpServerRequestHandler.class);
 	private List<ContainerRequestFilter> containerRequestFilters;
 	private List<ContainerResponseFilter> containerResponseFilters;
+	private ExceptionHandler exceptionHandler;
 
 	public FilteredHttpServerRequestHandler(List<MethodBinding> bindings, ParameterResolver parameterResolver,
-			ObjectMapper objectMapper, List<ContainerRequestFilter> containerRequestFilters,
-			List<ContainerResponseFilter> containerResponseFilters) {
-		super(bindings, parameterResolver, objectMapper);
+											ObjectMapper objectMapper, List<ContainerRequestFilter> containerRequestFilters,
+											List<ContainerResponseFilter> containerResponseFilters,
+											ExceptionHandler exceptionHandler) {
+		super(bindings, parameterResolver, objectMapper, exceptionHandler);
 		this.containerRequestFilters = containerRequestFilters;
 		this.containerResponseFilters = containerResponseFilters;
+		this.exceptionHandler = exceptionHandler;
 	}
 	
 	@Override
@@ -40,8 +43,8 @@ public class FilteredHttpServerRequestHandler extends HttpServerRequestHandler {
 				LOG.info("Run filted: " + containerRequestFilter);
 				containerRequestFilter.filter(requestContext);
 			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException(e);
+				LOG.error("Exception while applying filters", e);
+				exceptionHandler.handle(e, routingContext.request());
 			}
 		}
 		super.handle(routingContext);

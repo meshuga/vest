@@ -50,7 +50,7 @@ public class JaxrsAnnotationParameterHandler implements ParameterHandler<Object>
 
 		Object returnObject;
 		String param = null;
-		Object defaultValue = null;
+		String defaultValue = null;
 
 		for(Annotation annotation : annotations) {
 
@@ -83,7 +83,7 @@ public class JaxrsAnnotationParameterHandler implements ParameterHandler<Object>
 		if (param != null) {
             returnObject = typeParser.parseType(param, parameterType);
 		} else {
-			returnObject = defaultValue;
+			returnObject = defaultValue != null ? typeParser.parseType(defaultValue, parameterType) : null;
 		}
 
 		return returnObject;

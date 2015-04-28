@@ -35,10 +35,12 @@ import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.container.ContainerResponseFilter;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.ext.ExceptionMapper;
 
 import me.bayes.vertx.vest.binding.DefaultRouteBindingHolderFactory;
 import me.bayes.vertx.vest.binding.Function;
 import me.bayes.vertx.vest.binding.RouteBindingHolder.MethodBinding;
+import me.bayes.vertx.vest.handler.ExceptionHandler;
 import me.bayes.vertx.vest.handler.FilteredHttpServerRequestHandler;
 import me.bayes.vertx.vest.handler.HttpServerRequestHandler;
 import me.bayes.vertx.vest.util.DefaultParameterResolver;
@@ -144,10 +146,14 @@ public class DefaultRouteMatcherBuilder extends AbstractRouteMatcherBuilder {
 					default:
 						throw new IllegalArgumentException("Unknown http method: " + method);
 				}
+
+				ExceptionHandler exceptionHandler = new ExceptionHandler(
+						application.getProviders(ExceptionMapper.class), objectMapper);
 				
 				HttpServerRequestHandler requestHandler = new FilteredHttpServerRequestHandler(bindings, parameterResolver, objectMapper,
 						application.getProviders(ContainerRequestFilter.class),
-						application.getProviders(ContainerResponseFilter.class));
+						application.getProviders(ContainerResponseFilter.class),
+						exceptionHandler);
 				route.handler(requestHandler);
 			}
 		});

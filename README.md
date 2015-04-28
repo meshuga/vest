@@ -22,7 +22,7 @@ Current Support
 - @Produces (Alpha)
 - @Provider for ExceptionMapper and ContainerRequestFilter
 - @PostConstruct for endpoints
-- Parameters can be casted to custom objects (more: https://github.com/drapostolos/type-parser)
+- Parameters can be mapped to custom objects (more: https://github.com/drapostolos/type-parser)
 
 TODO
 ====

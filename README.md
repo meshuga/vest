@@ -17,14 +17,15 @@ Current Support
 - @HeaderParam
 - @QueryParam 
 - @DefaultValue 
-- JsonObject as a parameter in a handler
+- Object mapping of the body using Jackson
 - @Consumes (Alpha)
 - @Produces (Alpha)
+- @Provider for ExceptionMapper and ContainerRequestFilter
+- @PostConstruct for endpoints
+- Parameters can be casted to custom objects (more: https://github.com/drapostolos/type-parser)
 
 TODO
 ====
-- Enums support - see me.bayes.vertx.vest.util.JaxrsAnnotationParamterHandler
-- Custom objects deserialization support
 - Validation support
 - ...
 
@@ -74,7 +75,7 @@ application.addPackagesToScan("<package to scan>");
 
 HttpServer server = vertx.createHttpServer();
 
-application.addSingleton(vertx);
+application.addSingleton(vertx, config(), new ObjectMapper());
 
 RouteMatcherBuilder builder = new JaxrsRouteMatcherBuilder(application);
 server.requestHandler(builder.build());

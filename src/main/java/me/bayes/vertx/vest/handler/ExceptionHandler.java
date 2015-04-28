@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class ExceptionHandler {
+    private static final Response.Status DEFAULT_STATUS = Response.Status.BAD_REQUEST;
     private List<ExceptionMapper> providers;
     private ObjectMapper objectMapper;
 
@@ -24,8 +25,16 @@ public class ExceptionHandler {
             if (isAcceptable(exceptionMapper, throwable)) {
                 Response response = exceptionMapper.toResponse(throwable);
                 handleResponse(response, request);
+                return;
             }
         }
+        handleDefaultResponse(request);
+    }
+
+    private void handleDefaultResponse(HttpServerRequest request) {
+        request.response().setStatusCode(DEFAULT_STATUS.getStatusCode());
+        request.response().setStatusMessage(DEFAULT_STATUS.getReasonPhrase());
+        request.response().end();
     }
 
     /**

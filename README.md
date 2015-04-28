@@ -77,8 +77,9 @@ HttpServer server = vertx.createHttpServer();
 
 application.addSingleton(vertx, config(), new ObjectMapper());
 
-RouteMatcherBuilder builder = new JaxrsRouteMatcherBuilder(application);
-server.requestHandler(builder.build());
+RouteMatcherBuilder builder = new DefaultRouteMatcherBuilder(application);
+Router matcher = builder.build();
+server.requestHandler(matcher::accept);
 
 server.listen(18080);
 ```

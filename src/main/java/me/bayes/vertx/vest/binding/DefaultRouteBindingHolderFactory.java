@@ -22,10 +22,12 @@ import me.bayes.vertx.vest.util.UriPathUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Set;
@@ -85,6 +87,7 @@ public class DefaultRouteBindingHolderFactory implements
 		Object instance = clazz.getConstructor().newInstance();
 		
 		ContextUtil.assignContextFields(clazz, instance, application);
+		runPostConstructMethods(instance);
 		
 		
 		for(Method method : clazz.getMethods()) {
@@ -95,14 +98,27 @@ public class DefaultRouteBindingHolderFactory implements
 				continue;
 			}
 			
-			addMethodBindings(clazz, 
+			addMethodBindings(clazz,
 					instance,
-					UriPathUtil.concatPaths(contextPath, pathAnnotation.value()), 
+					UriPathUtil.concatPaths(contextPath, pathAnnotation.value()),
 					method);
 		}
 		
 	}
-	
+
+	private void runPostConstructMethods(Object instance) throws InvocationTargetException, IllegalAccessException {
+		Method[] methods = instance.getClass().getMethods();
+
+		for(Method method : methods) {
+			if (method.isAnnotationPresent(PostConstruct.class)) {
+				if (method.getParameterCount() != 0) {
+					throw new IllegalArgumentException("Method cannot contain any parameters: " + method);
+				}
+				method.invoke(instance);
+			}
+		}
+	}
+
 	/**
 	 * 
 	 * @param routeMatcher

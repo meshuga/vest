@@ -171,35 +171,25 @@ public class HttpServerRequestHandler implements Handler<RoutingContext> {
 
         final Buffer buffer = Buffer.buffer();
 
-        request.handler(new Handler<Buffer>() {
+        request.handler(buffer::appendBuffer);
 
-            @Override
-            public void handle(Buffer internalBuffer) {
-                buffer.appendBuffer(internalBuffer);
+        request.endHandler(event -> {
+            String jsonString = buffer.toString();
+            if (deserializeUsingJackson) {
+                try {
+                    parameters[objectParameterIndex] = objectMapper.readValue(jsonString, parameterTypes[objectParameterIndex]);
+                } catch (IOException e) {
+                    handleException(request, e);
+                    return;
+                }
+            } else {
+                parameters[objectParameterIndex] = new JsonObject(jsonString);
             }
 
-        });
-
-        request.endHandler(new Handler<Void>() {
-
-            @Override
-            public void handle(Void event) {
-                String jsonString = buffer.toString();
-                if (deserializeUsingJackson) {
-                    try {
-                        parameters[objectParameterIndex] = objectMapper.readValue(jsonString, parameterTypes[objectParameterIndex]);
-                    } catch (IOException e) {
-                        handleException(request, e);
-                    }
-                } else {
-                    parameters[objectParameterIndex] = new JsonObject(jsonString);
-                }
-
-                try {
-                    method.invoke(delegate, parameters);
-                } catch (Exception e) {
-                    handleException(request, e);
-                }
+            try {
+                method.invoke(delegate, parameters);
+            } catch (Exception e) {
+                handleException(request, e);
             }
         });
     }
